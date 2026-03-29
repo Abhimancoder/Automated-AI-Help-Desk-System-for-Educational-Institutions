@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Help Desk Chatbot</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f5f7fb;
+}
+
+/* HEADER */
+header {
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+  color: white;
+  text-align: center;
+  padding: 30px 20px;
+}
+
+header h1 { margin: 0; }
+header p { opacity: 0.9; }
+
+/* HERO */
+.hero {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.hero h2 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.hero p {
+  color: #555;
+}
+
+/* CHAT BUTTON */
+#chatBtn {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: #4a90e2;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+/* CHAT WINDOW */
+#chatWindow {
+  position: fixed;
+  bottom: 100px;
+  right: 25px;
+  width: 350px;
+  height: 500px;
+  background: white;
+  border-radius: 15px;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* CHAT HEADER */
+.chat-header {
+  background: #4a90e2;
+  color: white;
+  padding: 12px;
+  font-weight: bold;
+}
+
+/* MESSAGES */
+.messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.message {
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 12px;
+  max-width: 75%;
+}
+
+.user {
+  background: #4a90e2;
+  color: white;
+  margin-left: auto;
+}
+
+.bot {
+  background: #e5e7eb;
+}
+
+/* INPUT */
+.input-area {
+  display: flex;
+  border-top: 1px solid #ddd;
+}
+
+input {
+  flex: 1;
+  border: none;
+  padding: 10px;
+  outline: none;
+}
+
+button.send {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 15px;
+  background: #f1f1f1;
+  font-size: 12px;
+  color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>AI Help Desk Chatbot</h1>
+  <p>Smart assistant for student queries, admissions, and support</p>
+</header>
+
+<div class="hero">
+  <h2>24/7 AI Support for Educational Institutions</h2>
+  <p>Ask about admissions, fees, exams, or campus services instantly.</p>
+</div>
+
+<!-- CHAT BUTTON -->
+<button id="chatBtn" onclick="toggleChat()">💬</button>
+
+<!-- CHAT WINDOW -->
+<div id="chatWindow">
+  <div class="chat-header">AI Assistant</div>
+  <div class="messages" id="messages"></div>
+
+  <div class="input-area">
+    <input id="input" placeholder="Ask something..." />
+    <button class="send" onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<footer>
+  © 2026 AI Help Desk | Educational Support System
+</footer>
+
+<script>
+const API_KEY = "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";
+
+const chatWindow = document.getElementById("chatWindow");
+const messagesDiv = document.getElementById("messages");
+const input = document.getElementById("input");
+
+function toggleChat() {
+  chatWindow.style.display =
+    chatWindow.style.display === "flex" ? "none" : "flex";
+}
+
+function addMessage(text, type) {
+  const msg = document.createElement("div");
+  msg.className = "message " + type;
+  msg.innerText = text;
+  messagesDiv.appendChild(msg);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+async function sendMessage() {
+  const userText = input.value.trim();
+  if (!userText) return;
+
+  addMessage(userText, "user");
+  input.value = "";
+
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + API_KEY
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful AI assistant for a college help desk."
+          },
+          {
+            role: "user",
+            content: userText
+          }
+        ]
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.choices[0].message.content;
+
+    addMessage(reply, "bot");
+
+  } catch (err) {
+    addMessage("Error connecting to AI", "bot");
+  }
+}
+
+input.addEventListener("keypress", function(e) {
+  if (e.key === "Enter") sendMessage();
+});
+</script>
+
+</body>
+</html>
